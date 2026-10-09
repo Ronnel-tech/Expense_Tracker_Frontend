@@ -201,24 +201,39 @@ function App() {
     try {
       if (mode === 'login') {
         const response = await api.login(authForm.username, authForm.password)
+        if (!response || !response.tokens) {
+          throw new Error(response?.message || 'Login failed: no tokens returned by the server.')
+        }
         const nextSession = {
-          accessToken: response.tokens.access_token,
-          refreshToken: response.tokens.refresh_token,
-          user: response.user,
+          accessToken: response.tokens?.access_token || response.access_token,
+          refreshToken: response.tokens?.refresh_token || response.refresh_token,
+          user: response.user || { username: authForm.username },
         }
         updateSession(nextSession)
       } else {
         const response = await api.register(authForm.username, authForm.email, authForm.password)
-        const nextSession = {
-          accessToken: response.tokens.access_token,
-          refreshToken: response.tokens.refresh_token,
-          user: {
-            id: response.user_id,
+        if (response?.tokens?.access_token) {
+          const nextSession = {
+            accessToken: response.tokens.access_token,
+            refreshToken: response.tokens.refresh_token,
+            user: {
+              id: response.user_id,
+              username: authForm.username,
+              role: 'user',
+            },
+          }
+          updateSession(nextSession)
+        } else {
+          // If register succeeded in DB but did not return tokens (e.g. backend requires login or refresh table missing)
+          setInfo(response?.message || 'Registration successful! Please log in with your credentials.')
+          setMode('login')
+          setAuthForm({
             username: authForm.username,
-            role: 'user',
-          },
+            email: '',
+            password: '',
+          })
+          return
         }
-        updateSession(nextSession)
       }
 
       setAuthForm(defaultAuthForm)
@@ -227,7 +242,7 @@ function App() {
         date: getLocalDateTimeValue(),
       })
     } catch (requestError) {
-      setError(requestError.message)
+      setError(requestError.message || 'Authentication failed.')
     } finally {
       setAuthLoading(false)
     }
