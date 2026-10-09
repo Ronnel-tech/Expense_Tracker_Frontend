@@ -121,6 +121,7 @@ function App() {
   const [saving, setSaving] = useState(false)
   const [authLoading, setAuthLoading] = useState(false)
   const [error, setError] = useState('')
+  const [info, setInfo] = useState('')
 
   const updateSession = (nextSession) => {
     sessionRef.current = nextSession
@@ -197,6 +198,7 @@ function App() {
     event.preventDefault()
     setAuthLoading(true)
     setError('')
+    setInfo('')
 
     try {
       if (mode === 'login') {
@@ -266,6 +268,7 @@ function App() {
   const handleLogout = () => {
     clearSession()
     setError('')
+    setInfo('')
     setAuthForm(defaultAuthForm)
     setSearch('')
     setExpenses([])
@@ -381,6 +384,7 @@ function App() {
       </header>
 
       {error ? <div className="alert">{error}</div> : null}
+      {info ? <div className="alert alert-info">{info}</div> : null}
 
       {!isAuthed ? (
         <div className="auth-layout">

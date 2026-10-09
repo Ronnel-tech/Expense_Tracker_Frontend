@@ -94,6 +94,12 @@ button {
   margin-bottom: 1rem;
 }
 
+.alert-info {
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(12, 74, 110, 0.35);
+  color: #bae6fd;
+}
+
 .auth-layout,
 .content-grid {
   display: grid;
